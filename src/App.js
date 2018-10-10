@@ -1,28 +1,50 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+// The basics
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import { withRouter } from "react-router";
+
+// Action creators and helpers
+import { establishCurrentUser } from "./actions/auth";
+import { isServer } from "./store";
+
+import Header from "./components/header";
+import Routes from "./routes";
+
+import "./App.css";
 
 class App extends Component {
+  componentWillMount() {
+    if (!isServer) {
+      this.props.establishCurrentUser();
+    }
+  }
+
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div id="app">
+        <Header
+          isAuthenticated={this.props.isAuthenticated}
+          current={this.props.location.pathname}
+        />
+        <div id="content">
+          <Routes />
+        </div>
       </div>
     );
   }
 }
 
-export default App;
+const mapStateToProps = state => ({
+  isAuthenticated: state.auth.isAuthenticated
+});
+
+const mapDispatchToProps = dispatch =>
+  bindActionCreators({ establishCurrentUser }, dispatch);
+
+export default withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(App)
+);
